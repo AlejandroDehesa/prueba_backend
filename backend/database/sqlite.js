@@ -1,6 +1,12 @@
 import sqlite3 from 'sqlite3';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const db = new sqlite3.Database('./backend/database/tienda.db');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const rutaBaseDatos = path.join(__dirname, 'tienda.db');
+
+const db = new sqlite3.Database(rutaBaseDatos);
 
 export const inicializarBaseDatos = () => {
   return new Promise((resolve, reject) => {

@@ -22,8 +22,12 @@ app.get('/productos', async (req, res) => {
   }
 });
 
-inicializarBaseDatos().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Servidor funcionando en http://localhost:${PORT}`);
+inicializarBaseDatos()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Servidor funcionando en http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Error al inicializar la base de datos:', error.message);
   });
-});
