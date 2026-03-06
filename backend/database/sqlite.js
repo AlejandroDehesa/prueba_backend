@@ -8,6 +8,46 @@ const rutaBaseDatos = path.join(__dirname, 'tienda.db');
 
 const db = new sqlite3.Database(rutaBaseDatos);
 
+const productosIniciales = [
+  { id: 'A001', titulo: 'Teclado mecánico', precio: 89.99 },
+  { id: 'A002', titulo: 'Ratón gaming', precio: 49.95 },
+  { id: 'A003', titulo: 'Monitor 27 pulgadas', precio: 229.90 },
+  { id: 'A004', titulo: 'Auriculares inalámbricos', precio: 119.50 },
+  { id: 'A005', titulo: 'Webcam Full HD', precio: 59.99 }
+];
+
+const contarProductos = () => {
+  return new Promise((resolve, reject) => {
+    db.get('SELECT COUNT(*) AS total FROM productos', [], (error, row) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(row.total);
+      }
+    });
+  });
+};
+
+const insertarProductosIniciales = () => {
+  return new Promise((resolve, reject) => {
+    const sentencia = db.prepare(
+      'INSERT INTO productos (id, titulo, precio) VALUES (?, ?, ?)'
+    );
+
+    for (const producto of productosIniciales) {
+      sentencia.run(producto.id, producto.titulo, producto.precio);
+    }
+
+    sentencia.finalize((error) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+
 export const inicializarBaseDatos = () => {
   return new Promise((resolve, reject) => {
     db.run(
@@ -16,11 +56,25 @@ export const inicializarBaseDatos = () => {
         titulo TEXT NOT NULL,
         precio REAL NOT NULL
       )`,
-      (error) => {
+      async (error) => {
         if (error) {
           reject(error);
-        } else {
+          return;
+        }
+
+        try {
+          const totalProductos = await contarProductos();
+
+          if (totalProductos === 0) {
+            await insertarProductosIniciales();
+            console.log('Productos iniciales insertados correctamente');
+          } else {
+            console.log('La base de datos ya contiene productos');
+          }
+
           resolve();
+        } catch (err) {
+          reject(err);
         }
       }
     );
